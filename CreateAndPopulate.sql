@@ -61,6 +61,14 @@ CREATE TABLE APP_USER (
 	No_of_playlists INT DEFAULT 0
 );
 
+CREATE TABLE SUBSCRIPTION (
+	User_ID INT,
+	Start_date DATE,
+	End_date DATE,
+	Price DECIMAL,
+	FOREIGN KEY (User_ID) REFERENCES APP_USER(User_ID)
+);
+
 CREATE TABLE PLAYLIST (
 	Playlist_ID INT PRIMARY KEY,
 	Playlist_name VARCHAR(100) NOT NULL,
@@ -664,6 +672,19 @@ VALUES
 (7, 'bregounsightly', 'Diego Ramirez', '2019-08-29'),
 (8, 'greasforceful', 'Grave Lively', '2020-05-01'),
 (9, 'peettasteful', 'Peter Green', '2010-02-28');
+
+INSERT INTO SUBSCRIPTION (User_ID, Start_date, End_date, Price)
+VALUES
+(0, '2020-12-01', '2022-12-01', 100.00),
+(1, '2015-09-24', '2015-10-24', 10.99),
+(2, '2013-03-15', '2025-01-01', 600.00),
+(3, '2013-07-11', '2014-07-11', 50.99),
+(4, '2014-10-01', '2017-11-11', 259.99),
+(5, '2009-01-20', '2021-07-14', 600.00),
+(6, '2016-03-04', '2018-03-04', 100.00),
+(7, '2019-08-29', '2026-05-01', 300.99),
+(8, '2020-05-01', '2023-04-09', 299.99),
+(9, '2010-02-28', '2025-02-28', 750.00);
 
 INSERT INTO PLAYLIST (Playlist_ID, Playlist_name, Creator_ID, Is_private)
 VALUES
