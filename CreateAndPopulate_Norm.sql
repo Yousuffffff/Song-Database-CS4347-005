@@ -17,7 +17,7 @@ CREATE TABLE GROUP_MEMBERS (
 	Group_ID INT NOT NULL,
 	Member_name VARCHAR(100) NOT NULL,
 	FOREIGN KEY (Group_ID) REFERENCES ARTIST(Artist_ID), 
-    PRIMARY KEY (Group_ID, Member_name)
+    	PRIMARY KEY (Group_ID, Member_name)
 );
 
 CREATE TABLE FEATURES (
@@ -25,7 +25,7 @@ CREATE TABLE FEATURES (
 	Feature_ID INT NOT NULL,
 	FOREIGN KEY (Artist_ID) REFERENCES ARTIST(Artist_ID),
 	FOREIGN KEY (Feature_ID) REFERENCES ARTIST(Artist_ID), 
-    PRIMARY KEY (Artist_ID, Feature_ID)
+    	PRIMARY KEY (Artist_ID, Feature_ID)
 );
 
 CREATE TABLE ALBUM (
@@ -48,14 +48,14 @@ CREATE TABLE SONG_GENRES (
 	Song_ID INT NOT NULL,
 	Genre_name VARCHAR(100) NOT NULL,
 	FOREIGN KEY (Song_ID) REFERENCES SONG(Song_ID), 
-    PRIMARY KEY (Song_ID, Genre_name)
+    	PRIMARY KEY (Song_ID, Genre_name)
 );
 
 CREATE TABLE ARTIST_GENRES (
 	Artist_ID INT,
 	Genre_name VARCHAR(100) NOT NULL,
 	FOREIGN KEY (Artist_ID) REFERENCES ARTIST(Artist_ID), 
-    PRIMARY KEY (Artist_ID, Genre_name)
+    	PRIMARY KEY (Artist_ID, Genre_name)
 );
 
 CREATE TABLE APP_USER (
@@ -72,7 +72,7 @@ CREATE TABLE SUBSCRIPTION (
 	End_date DATE,
 	Price DECIMAL,
 	FOREIGN KEY (User_ID) REFERENCES APP_USER(User_ID), 
-    PRIMARY KEY (User_ID, Start_date)
+    	PRIMARY KEY (User_ID, Start_date)
 );
 
 CREATE TABLE PLAYLIST (
@@ -92,7 +92,7 @@ CREATE TABLE CONTAIN (
 	FOREIGN KEY (Album_ID) REFERENCES ALBUM(Album_ID),
 	FOREIGN KEY (Playlist_ID) REFERENCES PLAYLIST(Playlist_ID),
 	FOREIGN KEY (Song_ID) REFERENCES SONG(Song_ID), 
-    PRIMARY KEY (Album_ID, Playlist_ID, Song_ID)
+    	PRIMARY KEY (Album_ID, Playlist_ID, Song_ID)
 );
 
 
