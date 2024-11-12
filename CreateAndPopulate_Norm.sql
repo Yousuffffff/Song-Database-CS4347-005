@@ -792,9 +792,9 @@ VALUES
 
 INSERT INTO PLAYLIST_CONTAIN_ALBUM (Album_ID, Playlist_ID)
 VALUES
-(0, 0, NULL),
-(4, 1, NULL),
-(10, 2, NULL),
-(8, 3, NULL),
-(6, 7, NULL),
-(8, 8, NULL);
+(0, 0),
+(4, 1),
+(10, 2),
+(8, 3),
+(6, 7),
+(8, 8);
