@@ -17,7 +17,7 @@ CREATE TABLE GROUP_MEMBERS (
 	Group_ID INT NOT NULL,
 	Member_name VARCHAR(100) NOT NULL,
 	FOREIGN KEY (Group_ID) REFERENCES ARTIST(Artist_ID), 
-    	PRIMARY KEY (Group_ID, Member_name)
+    PRIMARY KEY (Group_ID, Member_name)
 );
 
 CREATE TABLE FEATURES (
@@ -25,7 +25,7 @@ CREATE TABLE FEATURES (
 	Feature_ID INT NOT NULL,
 	FOREIGN KEY (Artist_ID) REFERENCES ARTIST(Artist_ID),
 	FOREIGN KEY (Feature_ID) REFERENCES ARTIST(Artist_ID), 
-    	PRIMARY KEY (Artist_ID, Feature_ID)
+    PRIMARY KEY (Artist_ID, Feature_ID)
 );
 
 CREATE TABLE ALBUM (
@@ -48,14 +48,14 @@ CREATE TABLE SONG_GENRES (
 	Song_ID INT NOT NULL,
 	Genre_name VARCHAR(100) NOT NULL,
 	FOREIGN KEY (Song_ID) REFERENCES SONG(Song_ID), 
-    	PRIMARY KEY (Song_ID, Genre_name)
+    PRIMARY KEY (Song_ID, Genre_name)
 );
 
 CREATE TABLE ARTIST_GENRES (
 	Artist_ID INT,
 	Genre_name VARCHAR(100) NOT NULL,
 	FOREIGN KEY (Artist_ID) REFERENCES ARTIST(Artist_ID), 
-    	PRIMARY KEY (Artist_ID, Genre_name)
+    PRIMARY KEY (Artist_ID, Genre_name)
 );
 
 CREATE TABLE APP_USER (
@@ -72,7 +72,7 @@ CREATE TABLE SUBSCRIPTION (
 	End_date DATE,
 	Price DECIMAL,
 	FOREIGN KEY (User_ID) REFERENCES APP_USER(User_ID), 
-    	PRIMARY KEY (User_ID, Start_date)
+    PRIMARY KEY (User_ID, Start_date)
 );
 
 CREATE TABLE PLAYLIST (
@@ -85,14 +85,30 @@ CREATE TABLE PLAYLIST (
 	FOREIGN KEY (Creator_ID) REFERENCES APP_USER(User_ID)
 );
 
-CREATE TABLE CONTAIN (
+-- CONTAIN relation separated into 3 relations: 
+
+CREATE TABLE ALBUM_CONTAIN_SONG (
 	Album_ID INT,
-	Playlist_ID INT,
 	Song_ID INT,
 	FOREIGN KEY (Album_ID) REFERENCES ALBUM(Album_ID),
+	FOREIGN KEY (Song_ID) REFERENCES SONG(Song_ID), 
+    PRIMARY KEY (Album_ID, Song_ID)
+);
+
+CREATE TABLE PLAYLIST_CONTAIN_SONG (
+	Playlist_ID INT,
+	Song_ID INT,
 	FOREIGN KEY (Playlist_ID) REFERENCES PLAYLIST(Playlist_ID),
 	FOREIGN KEY (Song_ID) REFERENCES SONG(Song_ID), 
-    	PRIMARY KEY (Album_ID, Playlist_ID, Song_ID)
+    PRIMARY KEY (Playlist_ID, Song_ID)
+);
+
+CREATE TABLE PLAYLIST_CONTAIN_ALBUM (
+	Album_ID INT,
+	Playlist_ID INT,
+	FOREIGN KEY (Album_ID) REFERENCES ALBUM(Album_ID),
+	FOREIGN KEY (Playlist_ID) REFERENCES PLAYLIST(Playlist_ID),
+    PRIMARY KEY (Album_ID, Playlist_ID)
 );
 
 
@@ -108,23 +124,29 @@ BEGIN
 	INNER JOIN inserted i ON u.User_ID = i.Creator_ID;
 END;
 
+-- INC_REF_COUNT_PLAYLIST separated into 2 triggers
 
-CREATE TRIGGER INC_REF_COUNT_PLAYLIST
-ON CONTAIN
+CREATE TRIGGER INC_REF_COUNT_PLAYLIST_ALBUM
+ON PLAYLIST_CONTAIN_ALBUM
 AFTER INSERT
 AS
 BEGIN
 	UPDATE PLAYLIST
 	SET No_of_albums = No_of_albums + 1
 	FROM PLAYLIST p
-	INNER JOIN inserted i ON p.Playlist_ID = i.Playlist_ID AND i.Album_ID IS NOT NULL;
+	INNER JOIN inserted i ON p.Playlist_ID = i.Playlist_ID;
+END;
 
+CREATE TRIGGER INC_REF_COUNT_PLAYLIST_SONG
+ON PLAYLIST_CONTAIN_SONG
+AFTER INSERT
+AS
+BEGIN
 	UPDATE PLAYLIST
 	SET No_of_songs = No_of_songs + 1
 	FROM PLAYLIST p
-	INNER JOIN inserted i ON p.Playlist_ID = i.Playlist_ID AND i.Song_ID IS NOT NULL;
+	INNER JOIN inserted i ON p.Playlist_ID = i.Playlist_ID;
 END;
-
 
 CREATE TRIGGER DEC_REF_COUNT_USER
 ON PLAYLIST
@@ -137,21 +159,28 @@ BEGIN
 	INNER JOIN deleted d ON u.User_ID = d.Creator_ID;
 END;
 
+-- DEF_REF_COUNT_PLAYLIST separated into 2 triggers
 
-CREATE TRIGGER DEC_REF_COUNT_PLAYLIST
-ON CONTAIN
+CREATE TRIGGER DEC_REF_COUNT_PLAYLIST_ALBUM
+ON PLAYLIST_CONTAIN_ALBUM
 AFTER DELETE
 AS
 BEGIN
 	UPDATE PLAYLIST
 	SET No_of_albums = No_of_albums - 1
 	FROM PLAYLIST p
-	INNER JOIN deleted d ON p.Playlist_ID = d.Playlist_ID AND d.Album_ID IS NOT NULL;
+	INNER JOIN deleted d ON p.Playlist_ID = d.Playlist_ID;
+END; 
 
+CREATE TRIGGER DEC_REF_COUNT_PLAYLIST_SONG
+ON PLAYLIST_CONTAIN_SONG
+AFTER DELETE
+AS
+BEGIN
 	UPDATE PLAYLIST
 	SET No_of_songs = No_of_songs - 1
 	FROM PLAYLIST p
-	INNER JOIN deleted d ON p.Playlist_ID = d.Playlist_ID AND d.Song_ID IS NOT NULL;
+	INNER JOIN deleted d ON p.Playlist_ID = d.Playlist_ID;
 END;
 
 
@@ -529,7 +558,7 @@ VALUES
 (132, 'Pop'),
 (133, 'Pop');
 
-INSERT INTO CONTAIN (Album_ID, Song_ID)
+INSERT INTO ALBUM_CONTAIN_SONG (Album_ID, Song_ID)
 VALUES
 (0, 0),
 (0, 1),
@@ -707,60 +736,65 @@ VALUES
 (9, 'Sweet Mix', 2, 1),
 (10, 'vibes', 5, 0);
 
-INSERT INTO CONTAIN (Album_ID, Playlist_ID, Song_ID)
+
+
+INSERT INTO PLAYLIST_CONTAIN_SONG (Playlist_ID, Song_ID)
+VALUES
+(0, 123),
+(0, 10),
+(0, 5),
+(0, 101),
+(0, 20),
+(1, 15),
+(1, 16),
+(1, 17),
+(2, 100),
+(2, 133),
+(2, 98),
+(2, 43),
+(3, 45),
+(3, 58),
+(3, 43),
+(3, 12),
+(3, 13),
+(4, 24),
+(4, 25),
+(4, 26),
+(4, 39),
+(4, 76),
+(5, 35),
+(5, 56),
+(5, 106),
+(5, 107),
+(6, 20),
+(6, 21),
+(6, 128),
+(6, 129),
+(6, 130),
+(7, 2),
+(7, 3),
+(7, 50),
+(7, 43),
+(7, 29),
+(8, 102),
+(8, 27),
+(8, 29),
+(9, 67),
+(9, 89),
+(9, 91),
+(9, 92),
+(10, 20),
+(10, 21),
+(10, 22),
+(10, 70),
+(10, 53),
+(10, 35);
+
+INSERT INTO PLAYLIST_CONTAIN_ALBUM (Album_ID, Playlist_ID)
 VALUES
 (0, 0, NULL),
-(NULL, 0, 123),
-(NULL, 0, 10),
-(NULL, 0, 5),
-(NULL, 0, 101),
-(NULL, 0, 20),
-(NULL, 1, 15),
-(NULL, 1, 16),
-(NULL, 1, 17),
 (4, 1, NULL),
 (10, 2, NULL),
-(NULL, 2, 100),
-(NULL, 2, 133),
-(NULL, 2, 98),
-(NULL, 2, 43),
-(NULL, 3, 45),
-(NULL, 3, 58),
-(NULL, 3, 43),
-(NULL, 3, 12),
-(NULL, 3, 13),
 (8, 3, NULL),
-(NULL, 4, 24),
-(NULL, 4, 25),
-(NULL, 4, 26),
-(NULL, 4, 39),
-(NULL, 4, 76),
-(NULL, 5, 35),
-(NULL, 5, 56),
-(NULL, 5, 106),
-(NULL, 5, 107),
-(NULL, 6, 20),
-(NULL, 6, 21),
-(NULL, 6, 128),
-(NULL, 6, 129),
-(NULL, 6, 130),
-(NULL, 7, 2),
-(NULL, 7, 3),
-(NULL, 7, 50),
-(NULL, 7, 43),
-(NULL, 7, 29),
 (6, 7, NULL),
-(8, 8, NULL),
-(NULL, 8, 102),
-(NULL, 8, 27),
-(NULL, 8, 29),
-(NULL, 9, 67),
-(NULL, 9, 89),
-(NULL, 9, 91),
-(NULL, 9, 92),
-(NULL, 10, 20),
-(NULL, 10, 21),
-(NULL, 10, 22),
-(NULL, 10, 70),
-(NULL, 10, 53),
-(NULL, 10, 35);
+(8, 8, NULL);
